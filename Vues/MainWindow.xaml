@@ -2,20 +2,37 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:Vues"
+        WindowStartupLocation="CenterScreen"
         Title="MainWindow" Height="650" Width="1100">
     <Window.DataContext>
         <local:MainViewModel />
     </Window.DataContext>
+    
     <Grid>
+        
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="500"/>
             <!--Partie gauche statique-->
             <ColumnDefinition Width="*"/>
             <!--Partie droite flexible-->
         </Grid.ColumnDefinitions>
+        
+
+            
         <!--Partie gauche-->
         <StackPanel Grid.Column="0" Background="LightGreen" Margin="10,10,10,0" Height="664" VerticalAlignment="Top">
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <StackPanel>
+                    <ToolBar Background="Black" Height="30" VerticalAlignment="Top">
+                    <Menu>
+                        <MenuItem Header="Options" Background="Black" Foreground="Red" FontWeight="ExtraBold" FontSize="15">
+                            <MenuItem Header="Taille Police" Foreground="Red" FontWeight="ExtraBold" FontSize="15" Command="{Binding OuvrirPoliceWindowCommand}"/>
+                            <MenuItem Header="Parametres" Foreground="Red" FontWeight="ExtraBold" FontSize="15"/>
+                        </MenuItem>
+                    </Menu>
+                </ToolBar>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                 <Button Content="Client" VerticalAlignment="Center" Margin="0,0,10,0" FontSize="16" Command="{Binding DemanderCarteClientCommand}" Width="80" Height="30"/>
                 <TextBox Text="Demander sa carte au client" VerticalAlignment="Center" FontSize="16" Width="402"/>
             </StackPanel>
@@ -32,17 +49,17 @@
             <!-- Ajout de stack panels -->
             <StackPanel Orientation="Horizontal" Margin="0,10,0,0" HorizontalAlignment="Right">
                 <Label Content="Sous-total:" VerticalAlignment="Center" Margin="0,0,10,0" FontSize="16"/>
-                <TextBox VerticalAlignment="Center" FontSize="16" Width="100"/>
+                <TextBox Text="{Binding SubTotal, Mode=OneWay}" VerticalAlignment="Center" FontSize="16" Width="100"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="0,10,0,0" HorizontalAlignment="Right">
-                <Label Content="Réductions:" VerticalAlignment="Center" Margin="0,0,10,0" FontSize="16" Foreground="red"/>
-                <TextBox VerticalAlignment="Center" FontSize="16" Width="100"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="0,10,0,0" HorizontalAlignment="Right">
-                <Label Content="TOTAL:" VerticalAlignment="Center" Margin="0,0,10,0" FontSize="16" Foreground="Blue" FontWeight="Bold"/>
-                <TextBox VerticalAlignment="Center" FontSize="16" Width="100"/>
+                <Label Content="Réductions:" VerticalAlignment="Center" Margin="0,0,10,0" FontSize="16" Foreground="Red"/>
+                <TextBox Text="{Binding Reductions, Mode=OneWay}" VerticalAlignment="Center" FontSize="16" Width="100"/>
             </StackPanel>
 
+            <StackPanel Orientation="Horizontal" Margin="0,10,0,0" HorizontalAlignment="Right">
+                <Label Content="TOTAL:" VerticalAlignment="Center" Margin="0,0,10,0" FontSize="16" Foreground="Blue" FontWeight="Bold"/>
+                <TextBox Text="{Binding Total}" VerticalAlignment="Center" FontSize="16" Width="100"/>
+            </StackPanel>
             <StackPanel Orientation="Vertical" Margin="0,0,0,10">
                 <ListView Margin="0,10,0,0" FontSize="16" ItemsSource="{Binding ArticlesTicket}">
                     <ListView.View>
@@ -82,7 +99,7 @@
                         <Button Content="A faire" Width="80" Height="80" Background="DarkGreen" Foreground="Black" FontWeight="Bold"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <Button Content="Boulangerie" Width="80" Height="80" Background="Red" Foreground="Black" FontWeight="Bold"/>
+                        <Button Content="Boulangerie" Width="80" Height="80" Background="Red" Foreground="Black" FontWeight="Bold" Command="{Binding BoulangerieButtonCommand}"/>
                         <Button Content="Div 6%" Width="80" Height="80" Background="Red" Foreground="Black" FontWeight="Bold"/>
                         <Button Content="Div 21 %" Width="80" Height="80" Background="Red" Foreground="Black" FontWeight="Bold"/>
                         <Button Content="Tabac" Width="80" Height="80" Background="Red" Foreground="Black" FontWeight="Bold"/>
@@ -115,7 +132,8 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <Button Content="7" Width="1.5cm" Height="1cm" Margin="2" Background="White" Command="{Binding AppendNumberCommand}" CommandParameter="7"/>
+                            <Button Content="7" Width="1.5cm" Height="1cm" Margin="2" Background="White" Command="{Binding AppendNumberCommand}" CommandParameter="7" FontSize="{Binding ButtonTextSize}" />
+
                             <Button Content="8" Width="1.5cm" Height="1cm" Margin="2" Background="White" Grid.Column="1" Command="{Binding AppendNumberCommand}" CommandParameter="8"/>
                             <Button Content="9" Width="1.5cm" Height="1cm" Margin="2" Background="White" Grid.Column="2" Command="{Binding AppendNumberCommand}" CommandParameter="9"/>
                             <Button Content="4" Width="1.5cm" Height="1cm" Margin="2" Background="White" Grid.Row="1" Command="{Binding AppendNumberCommand}" CommandParameter="4"/>
@@ -147,10 +165,10 @@
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
-                        <Button Content="BONS" Width="150" Height="40" Margin="5"/>
+                        <Button Content="BONS" Width="150" Height="40" Margin="5" Command="{Binding BonsButtonCommand}"/>
                         <Button Content="CARTE" Width="150" Height="40" Margin="5" Grid.Row="1"/>
                         <Button Content="CASH" Width="150" Height="40" Margin="5" Grid.Row="2"/>
-                        <Button Content="TOTAL" Width="150" Height="40" Margin="5" Grid.Row="3"/>
+                        <Button Content="TOTAL" Width="150" Height="40" Margin="5" Grid.Row="3" Command="{Binding TotalButtonCommand}"/>
                     </Grid>
                 </Grid>
             </Grid>

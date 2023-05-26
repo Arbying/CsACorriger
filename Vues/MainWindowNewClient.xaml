@@ -36,7 +36,7 @@
 
         <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="5">
             <Button Content="Enregistrer" Margin="5" Command="{Binding SaveClientCommand}" />
-            <Button Content="Annuler" Margin="5" />
+            <Button Content="Annuler" Margin="5" Command="{Binding CancelCommand1}"/>
         </StackPanel>
     </Grid>
 </Window>

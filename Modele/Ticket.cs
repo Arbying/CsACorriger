@@ -12,6 +12,7 @@ namespace Modele
         private Client _client;
         private Caissier _caissier;
         private List<MesArticles> _articlesEnCours;
+
         #endregion
 
         #region Constructeurs
@@ -103,6 +104,22 @@ namespace Modele
             }
             ticketString += "Total : " + CalculerTotal() + "€\n";
             return ticketString;
+        }
+
+        public string PrnVersTicket()
+        {
+            string ticketString = "Date : " + _dateTicket.ToString("dd/MM/yyyy HH:mm:ss") + "\n";
+            ticketString += "Ticket n°" + _numTicket + "\n";
+            ticketString += "Client : " + _client.ToString() + "\n";
+            ticketString += "Caissier : " + _caissier.ToString() + "\n";
+            ticketString += "Articles :\n";
+            for (int i = 0; i < _articlesEnCours.Count; i++)
+            {
+                ticketString += "   " + _articlesEnCours[i].PrnVersTicket() + "\n";
+            }
+            ticketString += "Total : " + CalculerTotal() + "€\n";
+            return ticketString;
+
         }
 
         public void Save()

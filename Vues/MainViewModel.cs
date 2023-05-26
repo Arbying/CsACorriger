@@ -3,22 +3,51 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
+using System.Drawing;
+using System.Drawing.Printing;
+
 using System.Linq;
 using System.Text.Json;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using Modele;
 
+/*RESTE A FAIRE : 
+ * 1. Mettre à jour l'effet de la touche ENTER sur la textbox EnteredNumber
+ * 1.1 Il convient lors de l'appuie de la touche ENTER d'appeler la fonction PLUButtonClicked
+ *  (PS : J'ai tout essayé mais sans aucun résultat)
+ * 2. Corriger la MAJ des articles (lignes +/- 469 du présent code)
+ * 3. finir les boutons articles
+ * 4. Boutons verts
+ * 4.1 CLOTURE
+ * 4.1.0 : Créer la structure {int Z, int noTicket; GrandTotal; GrandBons; GrandCash;GrandCartes}
+ * 4.1.1 : MAJ zEnCours après chaque ticket. zEnCours = zEncours + totaux ticket
+ * 4.1.2 : Créer SaveZ and LoadZ -> Met à jour les Totaux de la caisse
+ * 4.1.3 : Créer SaveHistoZ and LoadHistoZ (historique des Z -> XML car la compta les récupere)
+ * 4.1.4 : Au demarrage, on charge LoadZ vers zenCours pour faire le 4.1.1
+ * 4.1.5 : Click bouton Z -> PRN + SaveZ
+ * 4.2 DEMO
+ * 4. Faire le fichier .log qui simule une 2eme imprimante pour le jouranal
+ * 5. Triller les variables dans le code car c'est moche
+ * 6. Mettre du commentaire et rendre présentable
+ * 
+ * 999. Avant EXAM s'assurer de changer l'imprimante par défaut
+ * 
+ * */
 namespace Vues
 {
-    public class MainViewModel : INotifyPropertyChanged
+    public class MainViewModel : ViewModelBase, INotifyPropertyChanged
     {
         private ObservableCollection<Article> _articles;
         public ObservableCollection<Article> Articles
         {
             get { return _articles; }
-            set { _articles = value; }
+            set { _articles = value;
+                OnPropertyChanged("Articles");
+            }
         }
 
         private ObservableCollection<Client> _clients;
@@ -88,6 +117,18 @@ namespace Vues
             set { _points = value; }
         }
 
+        private int _taille;
+        public int Taille
+        {
+            get { return _taille; }
+            set {
+                _taille = value;
+            }
+        }
+
+        public double SliderValue { get; set; }
+        public string CheminAcces { get; set; }
+
         private string _numeroCarteFidelite;
         public string NumeroCarteFidelite
         {
@@ -109,8 +150,8 @@ namespace Vues
             set { _prenom = value; }
         }
 
-        private System.DateTime _dateNaissance;
-        public System.DateTime DateNaissance
+        private DateTime _dateNaissance;
+        public DateTime DateNaissance
         {
             get { return _dateNaissance; }
             set { _dateNaissance = value; }
@@ -133,6 +174,18 @@ namespace Vues
                 OnPropertyChanged("Ticket");
             }
         }
+        private int _buttonTextSize;
+        public int ButtonTextSize
+        {
+            get { return _buttonTextSize; }
+            set
+            {
+                    _buttonTextSize = value * 2;
+                   // OnPropertyChanged("ButtonTextSize");
+                Console.WriteLine("bouton" + _buttonTextSize);
+
+            }
+        }
 
         private ObservableCollection<MesArticles> _articlesTicket;
         public ObservableCollection<MesArticles> ArticlesTicket
@@ -141,30 +194,122 @@ namespace Vues
             set { _articlesTicket = value; }
         }
 
-        private Article _articleEnCours;
-        public Article ArticleEnCours
+        private float _reductions;
+        public float Reductions
         {
-            get { return _articleEnCours; }
+            get { return _reductions; }
             set
             {
-                _articleEnCours = value;
-                OnPropertyChanged("ArticleEnCours");
+                _reductions = value;
+                OnPropertyChanged("Reductions");
             }
         }
 
-        public ICommand AppendNumberCommand { get; private set; }
-        public ICommand OpenNewArticleWindowCommand { get; private set; }
-        public ICommand OpenNewClientWindowCommand { get; private set; }
-        public ICommand XButtonCommand { get; private set; }
-        public ICommand PLUButtonCommand { get; private set; }
-        public ICommand SaveArticleCommand { get; private set; }
-        public ICommand CancelCommand { get; private set; }
-        public ICommand SaveClientCommand { get; private set; }
+        private ICommand _appendNumberCommand;
+        public ICommand AppendNumberCommand
+        {
+            get { return _appendNumberCommand; }
+            private set { _appendNumberCommand = value; }
+        }
+
+        private ICommand _openNewArticleWindowCommand;
+        public ICommand OpenNewArticleWindowCommand
+        {
+            get { return _openNewArticleWindowCommand; }
+            private set { _openNewArticleWindowCommand = value; }
+        }
+
+        private ICommand _openNewClientWindowCommand;
+        public ICommand OpenNewClientWindowCommand
+        {
+            get { return _openNewClientWindowCommand; }
+            private set { _openNewClientWindowCommand = value; }
+        }
+
+        private ICommand _xButtonCommand;
+        public ICommand XButtonCommand
+        {
+            get { return _xButtonCommand; }
+            private set { _xButtonCommand = value; }
+        }
+
+        private ICommand _validerCommand;
+        public ICommand ValiderCommand
+        {
+            get { return _validerCommand; }
+            private set { _validerCommand = value; }
+        }
+
+        private ICommand _pluButtonCommand;
+        public ICommand PLUButtonCommand
+        {
+            get { return _pluButtonCommand; }
+            private set { _pluButtonCommand = value; }
+        }
+
+        private ICommand _saveArticleCommand;
+        public ICommand SaveArticleCommand
+        {
+            get { return _saveArticleCommand; }
+            private set { _saveArticleCommand = value; }
+        }
+
+        private ICommand _cancelCommand;
+        public ICommand CancelCommand
+        {
+            get { return _cancelCommand; }
+            private set { _cancelCommand = value; }
+        }
+        private ICommand _cancelCommand1;
+        public ICommand CancelCommand1
+        {
+            get { return _cancelCommand1; }
+            private set { _cancelCommand1 = value; }
+        }
+        private ICommand _cancelCommand2;
+        public ICommand CancelCommand2
+        {
+            get { return _cancelCommand2; }
+            private set { _cancelCommand2 = value; }
+        }
+
+
+
+        private ICommand _saveClientCommand;
+        public ICommand SaveClientCommand
+        {
+            get { return _saveClientCommand; }
+            private set { _saveClientCommand = value; }
+        }
+
+        private ICommand _boulangerieButtonCommand;
+
+        public ICommand OuvrirPoliceWindowCommand { get; private set; }
+        public ICommand BoulangerieButtonCommand
+        {
+            get { return _boulangerieButtonCommand; }
+            private set { _boulangerieButtonCommand = value; }
+        }
+
+        private ICommand _totalButtonCommand;
+        public ICommand TotalButtonCommand
+        {
+            get { return _totalButtonCommand; }
+            private set { _totalButtonCommand = value; }
+        }
+
+        private ICommand _bonsButtonCommand;
+        public ICommand BonsButtonCommand
+        {
+            get { return _bonsButtonCommand; }
+            private set { _bonsButtonCommand = value; }
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         public MainViewModel()
         {
+            Taille = 10;
             OpenNewArticleWindowCommand = new RelayCommand(() => OpenNewArticleWindow());
             OpenNewClientWindowCommand = new RelayCommand(() => OpenNewClientWindow());
             AppendNumberCommand = new RelayCommand<string>(AppendNumber);
@@ -172,7 +317,16 @@ namespace Vues
             PLUButtonCommand = new RelayCommand(PLUButtonClicked);
             SaveArticleCommand = new RelayCommand(SaveArticle);
             CancelCommand = new RelayCommand(Cancel);
+            CancelCommand1 = new RelayCommand(Cancel1);
+            CancelCommand2 = new RelayCommand(Cancel2);
+            ValiderCommand = new RelayCommand(Valider);
+
+
             SaveClientCommand = new RelayCommand(SaveClient);
+            BoulangerieButtonCommand = new RelayCommand(BoulangerieButtonClicked);
+            TotalButtonCommand = new RelayCommand(TotalButtonClicked);
+            BonsButtonCommand = new RelayCommand(BonsButtonClicked);
+            OuvrirPoliceWindowCommand = new RelayCommand(OpenPoliceWindow);
 
             Articles = new ObservableCollection<Article>();
             Clients = new ObservableCollection<Client>();
@@ -180,11 +334,9 @@ namespace Vues
 
             LoadNumTicket();
             LoadArticles();
-            LoadClients();
 
             Ticket = new Ticket();
             Ticket.NumTicket = _numTicket;
-            ArticleEnCours = new Article();
         }
 
         private void OpenNewArticleWindow()
@@ -198,6 +350,28 @@ namespace Vues
             MainWindowNewClient newClientWindow = new MainWindowNewClient();
             newClientWindow.Show();
         }
+
+        private void Valider()
+        {
+            Taille = (int)SliderValue;
+            ButtonTextSize = Taille;
+            Console.WriteLine(Taille);
+            OnPropertyChanged("ButtonTextSize");
+            RaisePropertyChanged("ButtonTextSize");
+
+            Console.WriteLine(CheminAcces);
+
+            // Mettre à jour le registre
+            MyAppParamManager paramManager = new MyAppParamManager();
+            //paramManager.LoadRegistryParameter();
+            paramManager.CheminDossier = CheminAcces;
+            paramManager.TaillePolice = Taille;
+            paramManager.SaveRegistryParameter();
+
+            Cancel2();
+        }
+
+
 
         private void AppendNumber(string number)
         {
@@ -249,12 +423,15 @@ namespace Vues
 
                 if (articleFound)
                 {
-                    ArticleEnCours = _articleEnCours;
                     MesArticles venteArticle = new MesArticles((int)QuEntree, _articleEnCours);
                     Ticket.ArticlesEnCours.Add(venteArticle);
-                    ArticlesTicket.Add(venteArticle);
 
-                    Console.WriteLine(Ticket.ToString());
+                    Console.WriteLine(Ticket.PrnVersTicket());
+
+                    string printerOutput = Ticket.PrnVersTicket();
+                    PrintToPrinter(printerOutput);
+                    Console.WriteLine("Imprimé");
+                    UpdateArticlesTicket();
                 }
                 else
                 {
@@ -266,6 +443,16 @@ namespace Vues
                 MessageBox.Show("ERREUR CB", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             ClearEnteredNumber();
+            _quEntree = 1;
+        }
+
+        private void UpdateArticlesTicket()
+        {
+            ArticlesTicket.Clear();
+            foreach (MesArticles article in Ticket.ArticlesEnCours)
+            {
+                ArticlesTicket.Add(article);
+            }
         }
 
         private void SaveArticle()
@@ -279,78 +466,89 @@ namespace Vues
                 Points = Points
             };
 
+            //Vu que la ligne ci dessous n'a pas l'air de faire son effet 
             Articles.Add(newArticle);
-            SaveArticles();
-            ClearArticleFields();
+            // J'ai testé ceci mais même résultat, les articles ne se mettent pas à jour sans avoir redémarré
+            LoadArticles();
+
+            string filePath = "Articles.dat";
+            newArticle.AppendArticle(newArticle, filePath);
+
+           // UpdateArticlesTicket();
+
+            Application.Current.Windows.OfType<MainWindowNewArticle>().FirstOrDefault()?.Close();
         }
 
         private void Cancel()
         {
-            ClearArticleFields();
+            Application.Current.Windows.OfType<MainWindowNewArticle>().FirstOrDefault()?.Close();
         }
-
-        private void ClearArticleFields()
+        private void Cancel1()
         {
-            CodeBarre = 0;
-            Denomination = string.Empty;
-            Quantite = 0;
-            Prix = 0;
-            Points = 0;
+            Application.Current.Windows.OfType<MainWindowNewClient>().FirstOrDefault()?.Close();
+        }
+        private void Cancel2()
+        {
+            Application.Current.Windows.OfType<PoliceWindow>().FirstOrDefault()?.Close();
         }
 
         private void SaveClient()
         {
+            // Vérifier si le numéro de carte est un nombre valide pouvant être stocké dans un ulong
             if (ulong.TryParse(NumeroCarteFidelite, out ulong carteFidelite))
             {
-                Client newClient = new Client()
+                // Créer un nouveau client avec les données du formulaire
+                Client newClient = new Client
                 {
                     Nom = Nom,
                     Prenom = Prenom,
                     DateNaissance = DateNaissance,
+                    NumIntervenant = 0, // Mettez ici la valeur appropriée pour le numéro d'intervenant
                     CarteFidelite = carteFidelite,
-                    Points = Points
+                    Points = 0 // Mettez ici la valeur appropriée pour les points de fidélité
                 };
 
+                // Ajouter le nouveau client au vecteur de clients
                 Clients.Add(newClient);
-                SaveClients();
-                ClearClientFields();
+
+                // Ajouter le client dans le fichier des clients en utilisant la méthode AddClient de la classe Client du modèle
+                Client.AddClient(newClient);
+
+                // Fermer la fenêtre de création de nouveau client
+                Application.Current.Windows.OfType<MainWindowNewClient>().FirstOrDefault()?.Close();
             }
             else
             {
+                // Afficher un message d'erreur si le numéro de carte n'est pas valide
                 MessageBox.Show("Numéro de carte invalide.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-
-        private void ClearClientFields()
-        {
-            Nom = string.Empty;
-            Prenom = string.Empty;
-            DateNaissance = DateTime.Now;
-            NumeroCarteFidelite = string.Empty;
-            Points = 0;
-        }
-
         private void LoadNumTicket()
         {
-            string filePath = "NumTicket.dat";
+            string filePath = "Numtick.dat";
 
             if (File.Exists(filePath))
             {
-                string numTicketString = File.ReadAllText(filePath);
-                if (int.TryParse(numTicketString, out int numTicket))
-                {
-                    _numTicket = numTicket;
-                }
+                string json = File.ReadAllText(filePath);
+                _numTicket = JsonSerializer.Deserialize<int>(json);
+            }
+            else
+            {
+                _numTicket = 1;
             }
         }
 
         private void SaveNumTicket()
         {
-            string filePath = "NumTicket.dat";
-            File.WriteAllText(filePath, _numTicket.ToString());
+            string filePath = "Numtick.dat";
+            string json = JsonSerializer.Serialize(_numTicket);
+            File.WriteAllText(filePath, json);
         }
 
+        //J'appelle cette fonction pour mettre à jour mon vecteur d'articles :
+        //  1. Au demarrage du programme
+        //  2. Après chaque ajout d'article 
         private void LoadArticles()
         {
             string filePath = "Articles.dat";
@@ -358,41 +556,146 @@ namespace Vues
             if (File.Exists(filePath))
             {
                 string json = File.ReadAllText(filePath);
-                List<Article> loadedArticles = JsonSerializer.Deserialize<List<Article>>(json);
+                var loadedArticles = JsonSerializer.Deserialize<ObservableCollection<Article>>(json);
+
+                Articles.Clear(); // Effacer les anciens articles de la collection
+
                 foreach (Article article in loadedArticles)
                 {
-                    Articles.Add(article);
+                    Articles.Add(article); // Ajouter les articles chargés à la collection
                 }
             }
         }
 
-        private void SaveArticles()
-        {
-            string filePath = "Articles.dat";
-            string json = JsonSerializer.Serialize(Articles.ToList());
-            File.WriteAllText(filePath, json);
-        }
 
-        private void LoadClients()
+        private void BoulangerieButtonClicked()
         {
-            string filePath = "Clients.dat";
-
-            if (File.Exists(filePath))
+            if (float.TryParse(EnteredNumber, out float result))
             {
-                string json = File.ReadAllText(filePath);
-                List<Client> loadedClients = JsonSerializer.Deserialize<List<Client>>(json);
-                foreach (Client client in loadedClients)
+                _quEntree = result;
+            }
+            else
+            {
+                _quEntree = 1;
+            }
+
+            CB = 10101010;
+            Article _articleEnCours = new Article();
+            bool articleFound = false;
+            foreach (Article article in Articles)
+            {
+                if (article.CodeBarre == CB)
                 {
-                    Clients.Add(client);
+                    _articleEnCours = article;
+                    articleFound = true;
+                    break;
                 }
+            }
+
+            if (articleFound)
+            {
+                MesArticles venteArticle = new MesArticles((int)QuEntree, _articleEnCours);
+                Ticket.ArticlesEnCours.Add(venteArticle);
+
+                Console.WriteLine(Ticket.ToString());
+
+                UpdateArticlesTicket();
+            }
+
+            _quEntree = 1;
+            Console.WriteLine("JE SUIS LA");
+
+            ClearEnteredNumber();
+        }
+
+        private void TotalButtonClicked()
+        {
+            float total = Ticket.CalculerTotal();
+            SubTotal = total.ToString();
+        }
+
+        private void BonsButtonClicked()
+        {
+            if (float.TryParse(EnteredNumber, out float bons))
+            {
+                TotalButtonClicked();
+                Reductions += bons;
+                EnteredNumber = string.Empty;
+                UpdateReductions();
+            }
+            else
+            {
+                MessageBox.Show("BON INVALIDE", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private void SaveClients()
+        private void UpdateReductions()
         {
-            string filePath = "Clients.dat";
-            string json = JsonSerializer.Serialize(Clients.ToList());
-            File.WriteAllText(filePath, json);
+            ReductionsText = Reductions.ToString();
+            UpdateTotal();
         }
+
+        private void UpdateTotal()
+        {
+            float subTotal = 0;
+            if (float.TryParse(SubTotal, out subTotal))
+            {
+                Total = (subTotal - Reductions).ToString();
+            }
+        }
+
+        #region Properties
+
+        private string _subTotal;
+        public string SubTotal
+        {
+            get { return _subTotal; }
+            set
+            {
+                _subTotal = value;
+                OnPropertyChanged("SubTotal");
+                UpdateTotal();
+            }
+        }
+
+        private string _reductionsText;
+        public string ReductionsText
+        {
+            get { return _reductionsText; }
+            set
+            {
+                _reductionsText = value;
+                OnPropertyChanged("ReductionsText");
+            }
+        }
+
+        private string _total;
+        public string Total
+        {
+            get { return _total; }
+            set
+            {
+                _total = value;
+                OnPropertyChanged("Total");
+            }
+        }
+        private void OpenPoliceWindow()
+        {
+            PoliceWindow policeWindow = new PoliceWindow();
+            policeWindow.ShowDialog();
+        }
+        private void PrintToPrinter(string output)
+        {
+            using (PrintDocument printDocument = new PrintDocument())
+            {
+                printDocument.PrintPage += (sender, e) =>
+                {
+                    e.Graphics.DrawString(output, new Font("Arial", 10), Brushes.Black, PointF.Empty);
+                };
+                printDocument.Print();
+            }
+        }
+
+        #endregion
     }
 }

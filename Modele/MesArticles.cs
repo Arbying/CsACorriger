@@ -62,6 +62,32 @@
         {
             return _qu + " x " + _monArticle.ToString() + " = " + _montant + "€";
         }
+
+        public string PrnVersTicket()
+        {
+            string retour;
+            if (_qu == 1)
+            {
+                
+
+                retour = _monArticle.Denomination + "   " + _montant + "€";
+                if (_monArticle.Points> 0)
+                {
+                    retour += "\n Points plus : " + _monArticle.Points;
+                }
+                return retour;
+            }
+            else
+            {
+                retour = "  " + _qu + " * " + _monArticle.Prix + "\n" + _monArticle.Denomination + "   " + _montant + "€";
+                if (_monArticle.Points > 0)
+                {
+                    retour += "\n Points plus : " + (_monArticle.Points * _qu);
+                }
+                return retour;
+            }
+
+        }
         #endregion
     }
 }
